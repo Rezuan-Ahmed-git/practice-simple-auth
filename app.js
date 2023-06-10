@@ -1,9 +1,13 @@
-//database encryption
+//hashing password
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const md5 = require('md5');
+
+// console.log(md5('message'));
+
 const User = require('./models/user.model');
 
 const app = express();
@@ -34,7 +38,7 @@ app.get('/', (req, res) => {
 app.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const newUser = new User({ email, password });
+    const newUser = new User({ email, password: md5(password) });
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
@@ -44,7 +48,8 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email;
+    const password = md5(req.body.password);
     const user = await User.findOne({ email: email });
     if (user && user.password === password) {
       res.status(200).json({ status: 'valid user' });
