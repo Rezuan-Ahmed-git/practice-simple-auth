@@ -1,17 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const ejs = require('ejs');
-const app = express();
 require('./config/database');
-require('dotenv').config();
-require('./config/passport');
 const User = require('./models/user.model');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+require('dotenv').config();
+require('./config/passport');
 
 const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+
+const app = express();
 
 app.set('view engine', 'ejs');
 app.use(cors());
@@ -35,10 +36,35 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// base url
+//base url
 app.get('/', (req, res) => {
   res.render('index');
 });
+
+//register : get
+// app.get('/register', (req, res) => {
+//   res.render('register');
+// });
+
+//register : post
+// app.post('/register', async (req, res) => {
+//   try {
+//     const user = await User.findOne({ username: req.body.username });
+//     if (user) return res.status(400).send('user already exist');
+
+//     bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
+//       // Store hash in your password DB.
+//       const newUser = new User({
+//         username: req.body.username,
+//         password: hash,
+//       });
+//       await newUser.save();
+//       res.redirect('/login');
+//     });
+//   } catch (error) {
+//     res.status(500).send(error.message);
+//   }
+// });
 
 const checkLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -47,11 +73,10 @@ const checkLoggedIn = (req, res, next) => {
   next();
 };
 
-// login : get
+//login : get
 app.get('/login', checkLoggedIn, (req, res) => {
   res.render('login');
 });
-
 app.get(
   '/auth/google',
   passport.authenticate('google', { scope: ['profile'] })
@@ -69,6 +94,15 @@ app.get(
   }
 );
 
+//login : post
+// app.post(
+//   '/login',
+//   passport.authenticate('local', {
+//     failureRedirect: '/login',
+//     successRedirect: '/profile',
+//   })
+// );
+
 const checkAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
@@ -81,10 +115,10 @@ app.get('/profile', checkAuthenticated, (req, res) => {
   res.render('profile', { username: req.user.username });
 });
 
-// logout route
+//logout
 app.get('/logout', (req, res) => {
   try {
-    req.logout((err) => {
+    req.logOut((err) => {
       if (err) {
         return next(err);
       }
