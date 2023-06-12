@@ -15,11 +15,41 @@ app.get('/', (req, res) => {
 });
 
 //register : get
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
 //register : post
+app.post('/register', (req, res) => {
+  try {
+    res.status(201).send('user is created');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 //login : get
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
 //login : post
+app.post('/login', (req, res) => {
+  try {
+    res.status(200).send('user is logged in');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 //profile protected
+app.get('/profile', (req, res) => {
+  res.render('profile');
+});
+
+//logout
+app.get('/logout', (req, res) => {
+  res.redirect('/');
+});
 
 module.exports = app;
