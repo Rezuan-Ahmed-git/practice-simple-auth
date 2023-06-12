@@ -6,6 +6,7 @@ const User = require('./models/user.model');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 require('dotenv').config();
+require('./config/passport');
 
 const passport = require('passport');
 const session = require('express-session');
@@ -71,13 +72,13 @@ app.get('/login', (req, res) => {
 });
 
 //login : post
-app.post('/login', (req, res) => {
-  try {
-    res.status(200).send('user is logged in');
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    failureRedirect: '/login',
+    successRedirect: '/profile',
+  })
+);
 
 //profile protected
 app.get('/profile', (req, res) => {
