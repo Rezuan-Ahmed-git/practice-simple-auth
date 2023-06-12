@@ -87,12 +87,16 @@ app.post(
   })
 );
 
-//profile protected
-app.get('/profile', (req, res) => {
+const checkAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
-    res.render('profile');
+    return next();
   }
   res.redirect('/login');
+};
+
+// profile protected route
+app.get('/profile', checkAuthenticated, (req, res) => {
+  res.render('profile');
 });
 
 //logout
