@@ -1,6 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const User = require('./models/user.model');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
@@ -55,8 +57,36 @@ app.post('/register', async (req, res) => {
 });
 
 //login route
-app.post('/login', (req, res) => {
-  res.send('<h1>Welcome to the login</h1>');
+app.post('/login', async (req, res) => {
+  const user = await User.findOne({ username: req.body.username });
+
+  if (!user) {
+    return res.status(401).send({
+      success: false,
+      message: 'User is not found',
+    });
+  }
+
+  if (!bcrypt.compare(req.body.password, user.password)) {
+    return res.status(401).send({
+      success: false,
+      message: 'Incorrect Password',
+    });
+  }
+
+  const payload = {
+    id: user._id,
+    username: user.username,
+  };
+
+  const token = jwt.sign(payload, process.env.SECRET_KEY, {
+    expiresIn: '2d',
+  });
+  return res.status(200).send({
+    success: true,
+    message: 'User is logged in successfully',
+    token: 'Bearer ' + token,
+  });
 });
 
 //profile route
