@@ -1,18 +1,24 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const User = require('./models/user.model');
+const morgan = require('morgan');
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const bcrypt = require('bcrypt');
+
+const User = require('./models/user.model');
 const saltRounds = 10;
 
 const app = express();
-
 require('./config/database');
 
 app.use(cors());
+app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(passport.initialize());
+
+require('./config/passport');
 
 //home route
 app.get('/', (req, res) => {
@@ -67,7 +73,7 @@ app.post('/login', async (req, res) => {
     });
   }
 
-  if (!bcrypt.compare(req.body.password, user.password)) {
+  if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(401).send({
       success: false,
       message: 'Incorrect Password',
@@ -80,19 +86,29 @@ app.post('/login', async (req, res) => {
   };
 
   const token = jwt.sign(payload, process.env.SECRET_KEY, {
-    expiresIn: '2d',
+    expiresIn: '7d',
   });
   return res.status(200).send({
     success: true,
     message: 'User is logged in successfully',
-    token: 'Bearer ' + token,
+    token: 'bearer ' + token,
   });
 });
 
 //profile route
-app.get('/profile', (req, res) => {
-  res.send('<h1>Welcome to the profile</h1>');
-});
+app.get(
+  '/profile',
+  passport.authenticate('jwt', { session: false }),
+  function (req, res) {
+    return res.status(200).send({
+      success: true,
+      user: {
+        id: req.user._id,
+        username: req.user.username,
+      },
+    });
+  }
+);
 
 //resource not found
 app.use((req, res, next) => {
