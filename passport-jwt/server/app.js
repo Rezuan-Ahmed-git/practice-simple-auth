@@ -23,6 +23,11 @@ app.post('/login', (req, res) => {
   res.send('<h1>Welcome to the login</h1>');
 });
 
+//profile route
+app.get('/profile', (req, res) => {
+  res.send('<h1>Welcome to the profile</h1>');
+});
+
 //resource not found
 app.use((req, res, next) => {
   res.status(404).json({
