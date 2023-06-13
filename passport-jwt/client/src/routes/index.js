@@ -4,10 +4,12 @@ import Home from '../components/Home';
 import Register from '../components/Register';
 import Login from '../components/Login';
 import Error from '../components/Error';
+import Header from '../layout/Header';
 
 const Index = () => {
   return (
     <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
