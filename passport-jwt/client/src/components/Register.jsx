@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,6 +6,20 @@ const Register = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    axios
+      .get('http://localhost:4000/profile', {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((res) => navigate('/profile'))
+      .catch((error) => {
+        navigate('/register');
+      });
+  }, []);
 
   const handleRegister = () => {
     axios
