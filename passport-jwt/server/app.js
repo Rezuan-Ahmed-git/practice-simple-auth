@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 
+require('./config/database');
+
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
