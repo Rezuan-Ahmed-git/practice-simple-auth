@@ -10,7 +10,8 @@ const Login = () => {
   const handleLogin = () => {
     axios
       .post('http://localhost:4000/login', { username, password })
-      .then(() => {
+      .then((user) => {
+        localStorage.setItem('token', user?.data?.token);
         console.log('user is logged in');
         navigate('/profile');
       })
