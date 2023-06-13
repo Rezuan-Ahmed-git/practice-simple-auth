@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const User = require('./models/user.model');
 const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const app = express();
 
@@ -16,8 +18,40 @@ app.get('/', (req, res) => {
 });
 
 //register route
-app.post('/register', (req, res) => {
-  res.send('<h1>Welcome to the register</h1>');
+app.post('/register', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    if (user) return res.status(400).send('User already exist');
+
+    bcrypt.hash(req.body.password, saltRounds, async function (err, hash) {
+      const newUser = new User({
+        username: req.body.username,
+        password: hash,
+      });
+
+      await newUser
+        .save()
+        .then((user) => {
+          res.send({
+            success: true,
+            message: 'User is created successfully',
+            user: {
+              id: user._id,
+              username: user.username,
+            },
+          });
+        })
+        .catch((error) => {
+          res.send({
+            success: false,
+            message: 'User is not created',
+            error: error,
+          });
+        });
+    });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
 //login route
